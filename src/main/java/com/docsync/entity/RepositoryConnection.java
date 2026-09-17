@@ -13,9 +13,11 @@ import java.time.Instant;
 public class RepositoryConnection {
 
     protected RepositoryConnection() {}
-    public RepositoryConnection(RepositoryConnectionId id, Instant connectedAt) {
+    public RepositoryConnection(RepositoryConnectionId id, Instant connectedAt, User user, Repository repository) {
         this.id = id;
         this.connectedAt = connectedAt;
+        this.user = user;
+        this.repository = repository;
     }
 
     @EmbeddedId
