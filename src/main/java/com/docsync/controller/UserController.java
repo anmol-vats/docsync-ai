@@ -3,6 +3,7 @@ package com.docsync.controller;
 import com.docsync.dto.CreateUserRequest;
 import com.docsync.dto.CreateUserResponse;
 import com.docsync.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,7 +17,7 @@ public class UserController {
     }
 
     @PostMapping("/users")
-    public CreateUserResponse createUser(@RequestBody CreateUserRequest request) {
+    public CreateUserResponse createUser(@Valid @RequestBody CreateUserRequest request) {
         return userService.createUser(request);
     }
 }
