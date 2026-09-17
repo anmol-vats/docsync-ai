@@ -14,8 +14,10 @@ import java.util.UUID;
 @Table(name = "users")
 public class User {
     protected User(){}
-    public User(UUID id, String email,
-                String passwordHash, boolean emailVerified,
+    public User(UUID id,
+                String email,
+                String passwordHash,
+                boolean emailVerified,
                 Instant createdAt) {
         this.id = id;
         this.email = email;
