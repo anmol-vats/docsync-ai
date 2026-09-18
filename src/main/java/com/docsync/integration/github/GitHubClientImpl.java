@@ -1,5 +1,6 @@
 package com.docsync.integration.github;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -14,12 +15,15 @@ public class GitHubClientImpl implements GitHubClient {
 
     @Override
     public Optional<GitHubRepositoryResponse> getRepository(String owner, String repo) {
-        GitHubRepositoryResponse response = restClient
+        return restClient
                 .get()
                 .uri("/repos/{owner}/{repo}", owner, repo)
-                .retrieve()
-                .body(GitHubRepositoryResponse.class);
-
-        return Optional.ofNullable(response);
+                .exchange((request, response) -> {
+                    if(response.getStatusCode().value() == 404) {
+                        return Optional.empty();
+                    }else{
+                        return Optional.of(response.bodyTo(GitHubRepositoryResponse.class));
+                    }
+                });
     }
 }

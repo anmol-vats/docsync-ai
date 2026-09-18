@@ -20,4 +20,14 @@ public class GlobalExceptionHandler {
         }
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(value = RepositoryNotFoundException.class)
+    public ResponseEntity<?> handleRepositoryNotFound(RepositoryNotFoundException e) {
+        return new  ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(value = RepositoryAlreadyConnectedException.class)
+    public ResponseEntity<?> handleRepositoryAlreadyConnected(RepositoryAlreadyConnectedException e) {
+        return new  ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+    }
 }

@@ -5,6 +5,8 @@ import com.docsync.entity.Repository;
 import com.docsync.entity.RepositoryConnection;
 import com.docsync.entity.RepositoryConnectionId;
 import com.docsync.entity.User;
+import com.docsync.exception.RepositoryAlreadyConnectedException;
+import com.docsync.exception.RepositoryNotFoundException;
 import com.docsync.integration.github.GitHubClient;
 import com.docsync.integration.github.GitHubRepositoryResponse;
 import com.docsync.repository.RepositoryConnectionRepository;
@@ -35,7 +37,7 @@ public class RepositoryConnectionService {
 
         GitHubRepositoryResponse gitHubRepository = gitHubClient
                 .getRepository(request.getOwner(), request.getRepo()).
-                orElseThrow(() -> new RuntimeException("Github repository not found"));
+                orElseThrow(() -> new RepositoryNotFoundException("Github repository not found"));
 
         Repository repository = repositoryRepository.
                 findByGithubRepositoryId(gitHubRepository.getId())
@@ -53,7 +55,7 @@ public class RepositoryConnectionService {
 
         boolean alreadyConnected = repositoryConnectionRepository.existsByIdUserIdAndIdRepositoryId(userId, repository.getId());
         if(alreadyConnected){
-            throw new RuntimeException("Repository already connected");
+            throw new RepositoryAlreadyConnectedException("Repository already connected");
         }
         RepositoryConnectionId repositoryConnectionId = new RepositoryConnectionId(user.getId(), repository.getId());
         RepositoryConnection repositoryConnection = new
