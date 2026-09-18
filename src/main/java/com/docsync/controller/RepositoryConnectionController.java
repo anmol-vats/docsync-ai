@@ -1,6 +1,7 @@
 package com.docsync.controller;
 
 import com.docsync.dto.ConnectRepositoryRequest;
+import com.docsync.dto.ConnectRepositoryResponse;
 import com.docsync.service.RepositoryConnectionService;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,9 +21,9 @@ public class RepositoryConnectionController {
     }
 
     @PostMapping("/repositories/connect")
-    public void connectRepository(@Valid @RequestBody ConnectRepositoryRequest request,
-                                  @AuthenticationPrincipal Jwt jwt) {
+    public ConnectRepositoryResponse connectRepository(@Valid @RequestBody ConnectRepositoryRequest request,
+                                                       @AuthenticationPrincipal Jwt jwt) {
         UUID userId = UUID.fromString(jwt.getSubject());
-        repositoryConnectionService.connectRepository(userId, request);
+        return repositoryConnectionService.connectRepository(userId, request);
     }
 }

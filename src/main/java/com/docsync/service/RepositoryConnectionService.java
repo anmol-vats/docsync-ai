@@ -1,6 +1,7 @@
 package com.docsync.service;
 
 import com.docsync.dto.ConnectRepositoryRequest;
+import com.docsync.dto.ConnectRepositoryResponse;
 import com.docsync.entity.Repository;
 import com.docsync.entity.RepositoryConnection;
 import com.docsync.entity.RepositoryConnectionId;
@@ -32,7 +33,7 @@ public class RepositoryConnectionService {
         this.gitHubClient = gitHubClient;
     }
 
-    public void connectRepository(UUID userId, ConnectRepositoryRequest request){
+    public ConnectRepositoryResponse connectRepository(UUID userId, ConnectRepositoryRequest request){
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
 
         GitHubRepositoryResponse gitHubRepository = gitHubClient
@@ -52,8 +53,8 @@ public class RepositoryConnectionService {
                     );
                     return repositoryRepository.save(newRepository);
                 });
-
         boolean alreadyConnected = repositoryConnectionRepository.existsByIdUserIdAndIdRepositoryId(userId, repository.getId());
+
         if(alreadyConnected){
             throw new RepositoryAlreadyConnectedException("Repository already connected");
         }
@@ -62,5 +63,13 @@ public class RepositoryConnectionService {
                 RepositoryConnection(repositoryConnectionId, Instant.now(), user, repository);
 
         repositoryConnectionRepository.save(repositoryConnection);
+
+        ConnectRepositoryResponse response = new ConnectRepositoryResponse();
+        response.setRepositoryId(repository.getId());
+        response.setName(repository.getName());
+        response.setUrl(repository.getUrl());
+        response.setDefaultBranch(repository.getDefaultBranch());
+        response.setMessage("Repository connected successfully");
+        return response;
     }
 }
