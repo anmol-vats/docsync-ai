@@ -1,7 +1,6 @@
 package com.docsync.controller;
 
 import com.docsync.dto.ConnectRepositoryRequest;
-import com.docsync.entity.RepositoryConnection;
 import com.docsync.service.RepositoryConnectionService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
