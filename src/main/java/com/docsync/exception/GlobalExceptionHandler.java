@@ -30,4 +30,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleRepositoryAlreadyConnected(RepositoryAlreadyConnectedException e) {
         return new  ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
     }
+
+    @ExceptionHandler(value = UserNotFoundException.class)
+    public ResponseEntity<?> handleUserNotFound(UserNotFoundException e) {
+        return new  ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
 }

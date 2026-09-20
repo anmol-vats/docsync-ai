@@ -8,6 +8,7 @@ import com.docsync.entity.RepositoryConnectionId;
 import com.docsync.entity.User;
 import com.docsync.exception.RepositoryAlreadyConnectedException;
 import com.docsync.exception.RepositoryNotFoundException;
+import com.docsync.exception.UserNotFoundException;
 import com.docsync.integration.github.GitHubClient;
 import com.docsync.integration.github.GitHubRepositoryResponse;
 import com.docsync.repository.RepositoryConnectionRepository;
@@ -34,7 +35,7 @@ public class RepositoryConnectionService {
     }
 
     public ConnectRepositoryResponse connectRepository(UUID userId, ConnectRepositoryRequest request){
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
 
         GitHubRepositoryResponse gitHubRepository = gitHubClient
                 .getRepository(request.getOwner(), request.getRepo()).

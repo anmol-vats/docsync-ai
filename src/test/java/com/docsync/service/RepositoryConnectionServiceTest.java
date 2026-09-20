@@ -7,6 +7,7 @@ import com.docsync.entity.RepositoryConnection;
 import com.docsync.entity.User;
 import com.docsync.exception.RepositoryAlreadyConnectedException;
 import com.docsync.exception.RepositoryNotFoundException;
+import com.docsync.exception.UserNotFoundException;
 import com.docsync.integration.github.GitHubClient;
 import com.docsync.integration.github.GitHubRepositoryResponse;
 import com.docsync.repository.RepositoryConnectionRepository;
@@ -195,5 +196,14 @@ public class RepositoryConnectionServiceTest {
 
         verify(repositoryConnectionRepository, never())
                 .save(any(RepositoryConnection.class));
+    }
+
+    @Test
+    void shouldThrowWhenUserNotFound(){
+        UUID userId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        assertThrows(
+          UserNotFoundException.class, () -> repositoryConnectionService.connectRepository(userId, null)
+        );
     }
 }
