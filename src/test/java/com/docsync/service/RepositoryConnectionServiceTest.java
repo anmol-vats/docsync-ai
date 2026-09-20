@@ -5,6 +5,7 @@ import com.docsync.dto.ConnectRepositoryResponse;
 import com.docsync.entity.Repository;
 import com.docsync.entity.RepositoryConnection;
 import com.docsync.entity.User;
+import com.docsync.exception.RepositoryAlreadyConnectedException;
 import com.docsync.exception.RepositoryNotFoundException;
 import com.docsync.integration.github.GitHubClient;
 import com.docsync.integration.github.GitHubRepositoryResponse;
@@ -141,5 +142,58 @@ public class RepositoryConnectionServiceTest {
 
     }
 
+    @Test
+    void shouldThrowWhenRepositoryAlreadyConnected(){
+        UUID userId = UUID.randomUUID();
+        User user = new User(
+                userId,
+                "anmol@example.com",
+                "test12345",
+                false,
+                Instant.now()
+        );
 
+        when(userRepository.findById(userId))
+                .thenReturn(Optional.of(user));
+
+        GitHubRepositoryResponse response = new GitHubRepositoryResponse();
+        response.setName("Hello-World");
+        response.setUrl("https://github.com/octocat/Hello-World");
+        response.setId(123456L);
+        response.setDefaultBranch("master");
+
+        when(gitHubClient.getRepository("octocat", "Hello-World"))
+                .thenReturn(Optional.of(response));
+
+        Repository repository = new Repository(
+                UUID.randomUUID(),
+                response.getId(),
+                response.getName(),
+                response.getUrl(),
+                response.getDefaultBranch(),
+                Instant.now()
+        );
+
+        when(repositoryRepository.findByGithubRepositoryId(response.getId()))
+                .thenReturn(Optional.of(repository));
+
+        when(repositoryConnectionRepository
+                .existsByIdUserIdAndIdRepositoryId(
+                        userId,
+                        repository.getId()
+                ))
+                .thenReturn(true);
+
+        ConnectRepositoryRequest request = new ConnectRepositoryRequest();
+        request.setOwner("octocat");
+        request.setRepo("Hello-World");
+
+        assertThrows(
+                RepositoryAlreadyConnectedException.class,
+                () -> repositoryConnectionService.connectRepository(userId, request)
+        );
+
+        verify(repositoryConnectionRepository, never())
+                .save(any(RepositoryConnection.class));
+    }
 }
