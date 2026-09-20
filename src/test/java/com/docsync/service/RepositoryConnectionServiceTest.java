@@ -5,6 +5,7 @@ import com.docsync.dto.ConnectRepositoryResponse;
 import com.docsync.entity.Repository;
 import com.docsync.entity.RepositoryConnection;
 import com.docsync.entity.User;
+import com.docsync.exception.RepositoryNotFoundException;
 import com.docsync.integration.github.GitHubClient;
 import com.docsync.integration.github.GitHubRepositoryResponse;
 import com.docsync.repository.RepositoryConnectionRepository;
@@ -21,9 +22,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class RepositoryConnectionServiceTest {
@@ -104,4 +105,41 @@ public class RepositoryConnectionServiceTest {
         verify(repositoryConnectionRepository)
                 .save(any(RepositoryConnection.class));
     }
+
+    @Test
+    void shouldThrowWhenGithubRepositoryNotFound(){
+        UUID userId = UUID.randomUUID();
+
+        User user = new User(
+                userId,
+                "anmol@example.com",
+                "test12345",
+                false,
+                Instant.now()
+        );
+
+        when(userRepository.findById(userId))
+                .thenReturn(Optional.of(user));
+
+        ConnectRepositoryRequest request = new ConnectRepositoryRequest();
+        request.setOwner("octocat");
+        request.setRepo("DoesNotExist");
+
+        when(gitHubClient.getRepository("octocat", "DoesNotExist"))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                RepositoryNotFoundException.class,
+                () -> repositoryConnectionService.connectRepository(userId, request)
+        );
+
+        verify(repositoryRepository, never())
+                .save(any(Repository.class));
+
+        verify(repositoryConnectionRepository, never())
+                .save(any(RepositoryConnection.class));
+
+    }
+
+
 }
