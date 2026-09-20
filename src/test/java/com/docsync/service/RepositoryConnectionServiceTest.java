@@ -1,18 +1,19 @@
 package com.docsync.service;
 
-import com.docsync.dto.ConnectRepositoryRequest;
-import com.docsync.dto.ConnectRepositoryResponse;
-import com.docsync.entity.Repository;
-import com.docsync.entity.RepositoryConnection;
-import com.docsync.entity.User;
+import com.docsync.repositorymanagement.dto.ConnectRepositoryRequest;
+import com.docsync.repositorymanagement.dto.ConnectRepositoryResponse;
+import com.docsync.repositorymanagement.entity.Repository;
+import com.docsync.repositorymanagement.entity.RepositoryConnection;
+import com.docsync.user.entity.User;
 import com.docsync.exception.RepositoryAlreadyConnectedException;
 import com.docsync.exception.RepositoryNotFoundException;
 import com.docsync.exception.UserNotFoundException;
 import com.docsync.integration.github.GitHubClient;
 import com.docsync.integration.github.GitHubRepositoryResponse;
-import com.docsync.repository.RepositoryConnectionRepository;
-import com.docsync.repository.RepositoryRepository;
-import com.docsync.repository.UserRepository;
+import com.docsync.repositorymanagement.repository.RepositoryConnectionRepository;
+import com.docsync.repositorymanagement.repository.RepositoryRepository;
+import com.docsync.user.repository.UserRepository;
+import com.docsync.repositorymanagement.service.RepositoryConnectionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
