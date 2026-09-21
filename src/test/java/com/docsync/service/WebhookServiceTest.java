@@ -1,5 +1,6 @@
 package com.docsync.service;
 
+import com.docsync.exception.RepositoryNotConnectedException;
 import com.docsync.repositorymanagement.entity.Repository;
 import com.docsync.repositorymanagement.repository.RepositoryRepository;
 import com.docsync.webhook.dto.GitHubWebhookRequest;
@@ -18,6 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -83,6 +85,24 @@ public class WebhookServiceTest {
         WebhookResponse result = webhookService.handleWebhook(request);
         assertEquals("DUPLICATE", result.getStatus());
         assertEquals("Webhook already processed", result.getMessage());
+        verify(webhookEventRepository, never()).save(any(WebhookEvent.class));
+    }
+
+    @Test
+    void shouldThrowWhenRepositoryNotConnected(){
+        GitHubWebhookRequest request = new GitHubWebhookRequest();
+        request.setDeliveryId("123456");
+        request.setEventType("push");
+        request.setGithubRepositoryId(123456L);
+        request.setPayload("{\"test\":\"payload\"}");
+
+        when(webhookEventRepository.existsByDeliveryId(request.getDeliveryId()))
+                .thenReturn(false);
+
+        when(repositoryRepository.findByGithubRepositoryId(request.getGithubRepositoryId()))
+                .thenReturn(Optional.empty());
+
+        assertThrows(RepositoryNotConnectedException.class, () -> webhookService.handleWebhook(request));
         verify(webhookEventRepository, never()).save(any(WebhookEvent.class));
     }
 }
