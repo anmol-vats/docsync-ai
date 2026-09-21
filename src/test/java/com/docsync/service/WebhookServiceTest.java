@@ -19,8 +19,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class WebhookServiceTest {
@@ -68,5 +67,22 @@ public class WebhookServiceTest {
         verify(webhookEventRepository)
                 .save(any(WebhookEvent.class));
 
+    }
+
+    @Test
+    void shouldReturnDuplicateWhenWebhookAlreadyExists(){
+        GitHubWebhookRequest request = new GitHubWebhookRequest();
+        request.setDeliveryId("123456");
+        request.setEventType("push");
+        request.setGithubRepositoryId(123456L);
+        request.setPayload("{\"test\":\"payload\"}");
+
+        when(webhookEventRepository.existsByDeliveryId(request.getDeliveryId()))
+                .thenReturn(true);
+
+        WebhookResponse result = webhookService.handleWebhook(request);
+        assertEquals("DUPLICATE", result.getStatus());
+        assertEquals("Webhook already processed", result.getMessage());
+        verify(webhookEventRepository, never()).save(any(WebhookEvent.class));
     }
 }
