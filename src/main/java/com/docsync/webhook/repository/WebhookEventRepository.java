@@ -1,0 +1,10 @@
+package com.docsync.webhook.repository;
+
+import com.docsync.webhook.entity.WebhookEvent;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.UUID;
+
+public interface WebhookEventRepository extends JpaRepository<WebhookEvent, UUID> {
+    boolean existsByDeliveryId(String deliveryId);
+}
