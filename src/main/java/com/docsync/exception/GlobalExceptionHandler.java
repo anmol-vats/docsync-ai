@@ -35,4 +35,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleUserNotFound(UserNotFoundException e) {
         return new  ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(value = InvalidWebhookPayloadException.class)
+    public ResponseEntity<String> handleInvalidWebhookPayloadException(InvalidWebhookPayloadException e) {
+        return new  ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }
