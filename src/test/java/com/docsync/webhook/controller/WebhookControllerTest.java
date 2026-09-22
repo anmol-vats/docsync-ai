@@ -28,4 +28,16 @@ public class WebhookControllerTest {
                 )
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void shouldReturnBadRequestWhenRepositoryIsMissing() throws Exception {
+        mockMvc.perform(
+                post("/webhooks/github")
+                        .header("X-GitHub-Delivery", "123")
+                        .header("X-GitHub-Event", "push")
+                        .content("{\"something\": \"else\"}")
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isBadRequest());
+    }
 }
