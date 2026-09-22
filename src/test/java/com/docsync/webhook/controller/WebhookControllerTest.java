@@ -1,4 +1,5 @@
 package com.docsync.webhook.controller;
+import com.docsync.exception.InvalidWebhookPayloadException;
 import com.docsync.webhook.service.WebhookService;
 import org.springframework.http.MediaType;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,18 @@ public class WebhookControllerTest {
                         .content("{\"something\": \"else\"}")
                         .contentType(MediaType.APPLICATION_JSON)
                 )
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenRepositoryIdIsMissing() throws Exception {
+        mockMvc.perform(
+                post("/webhooks/github")
+                        .header("X-GitHub-Delivery", "123")
+                        .header("X-GitHub-Event", "push")
+                        .content("{\"repository\": {}}")
+                        .contentType(MediaType.APPLICATION_JSON)
+        )
                 .andExpect(status().isBadRequest());
     }
 }
