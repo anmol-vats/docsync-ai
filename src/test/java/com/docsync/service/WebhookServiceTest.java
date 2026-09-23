@@ -1,5 +1,6 @@
 package com.docsync.service;
 
+import com.docsync.analysis.entity.AnalysisJob;
 import com.docsync.analysis.repository.AnalysisJobRepository;
 import com.docsync.exception.RepositoryNotConnectedException;
 import com.docsync.repositorymanagement.entity.Repository;
@@ -73,6 +74,7 @@ public class WebhookServiceTest {
         assertEquals("Webhook received successfully", result.getMessage());
         verify(webhookEventRepository)
                 .save(any(WebhookEvent.class));
+        verify(analysisJobRepository).save(any(AnalysisJob.class));
 
     }
 
@@ -91,6 +93,7 @@ public class WebhookServiceTest {
         assertEquals("DUPLICATE", result.getStatus());
         assertEquals("Webhook already processed", result.getMessage());
         verify(webhookEventRepository, never()).save(any(WebhookEvent.class));
+        verify(analysisJobRepository, never()).save(any(AnalysisJob.class));
     }
 
     @Test
@@ -109,5 +112,6 @@ public class WebhookServiceTest {
 
         assertThrows(RepositoryNotConnectedException.class, () -> webhookService.handleWebhook(request));
         verify(webhookEventRepository, never()).save(any(WebhookEvent.class));
+        verify(analysisJobRepository, never()).save(any(AnalysisJob.class));
     }
 }
