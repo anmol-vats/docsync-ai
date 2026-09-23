@@ -22,6 +22,12 @@ public class AnalysisJob {
         this.completedAt = completedAt;
     }
 
+    public void markRunning(Instant startedAt){
+        this.status = AnalysisJobStatus.RUNNING;
+        this.attemptCount++;
+        this.startedAt = startedAt;
+    }
+
 
     @Id
     @Column(nullable = false)
