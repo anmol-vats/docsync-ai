@@ -1,5 +1,7 @@
 package com.docsync.webhook.service;
 
+import com.docsync.analysis.entity.AnalysisJob;
+import com.docsync.analysis.entity.AnalysisJobStatus;
 import com.docsync.analysis.repository.AnalysisJobRepository;
 import com.docsync.exception.RepositoryNotConnectedException;
 import com.docsync.repositorymanagement.repository.RepositoryRepository;
@@ -9,6 +11,7 @@ import com.docsync.webhook.entity.WebhookEvent;
 import com.docsync.webhook.entity.WebhookEventStatus;
 import com.docsync.webhook.repository.WebhookEventRepository;
 import com.docsync.repositorymanagement.entity.Repository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -26,6 +29,7 @@ public class WebhookService {
         this.analysisJobRepository = analysisJobRepository;
     }
 
+    @Transactional
     public WebhookResponse handleWebhook(GitHubWebhookRequest request){
         if(webhookEventRepository.existsByDeliveryId(request.getDeliveryId())){
             WebhookResponse webhookResponse = new WebhookResponse();
@@ -51,6 +55,19 @@ public class WebhookService {
                 WebhookEventStatus.RECEIVED
         );
         webhookEventRepository.save(webhookEvent);
+        AnalysisJob analysisJob = new AnalysisJob(
+                UUID.randomUUID(),
+                webhookEvent,
+                AnalysisJobStatus.PENDING,
+                0,
+                null,
+                Instant.now(),
+                null,
+                null
+        );
+
+        analysisJobRepository.save(analysisJob);
+
         WebhookResponse webhookResponse = new WebhookResponse();
         webhookResponse.setStatus("SUCCESS");
         webhookResponse.setMessage("Webhook received successfully");
