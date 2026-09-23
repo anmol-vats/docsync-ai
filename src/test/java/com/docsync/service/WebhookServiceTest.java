@@ -1,5 +1,6 @@
 package com.docsync.service;
 
+import com.docsync.analysis.repository.AnalysisJobRepository;
 import com.docsync.exception.RepositoryNotConnectedException;
 import com.docsync.repositorymanagement.entity.Repository;
 import com.docsync.repositorymanagement.repository.RepositoryRepository;
@@ -30,7 +31,8 @@ public class WebhookServiceTest {
     public void setUp() {
         webhookService = new WebhookService(
                 webhookEventRepository,
-                repositoryRepository
+                repositoryRepository,
+                analysisJobRepository
         );
     }
 
@@ -39,6 +41,9 @@ public class WebhookServiceTest {
 
     @Mock
     private RepositoryRepository  repositoryRepository;
+
+    @Mock
+    private AnalysisJobRepository analysisJobRepository;
 
     @Test
     void shouldHandleNewWebhookSuccessfully(){

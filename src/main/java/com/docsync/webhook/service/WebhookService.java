@@ -1,5 +1,6 @@
 package com.docsync.webhook.service;
 
+import com.docsync.analysis.repository.AnalysisJobRepository;
 import com.docsync.exception.RepositoryNotConnectedException;
 import com.docsync.repositorymanagement.repository.RepositoryRepository;
 import com.docsync.webhook.dto.GitHubWebhookRequest;
@@ -17,10 +18,12 @@ import java.util.UUID;
 public class WebhookService {
     private final WebhookEventRepository webhookEventRepository;
     private final RepositoryRepository repositoryRepository;
+    private final AnalysisJobRepository analysisJobRepository;
 
-    public WebhookService(WebhookEventRepository webhookEventRepository, RepositoryRepository repositoryRepository) {
+    public WebhookService(WebhookEventRepository webhookEventRepository, RepositoryRepository repositoryRepository, AnalysisJobRepository analysisJobRepository) {
         this.webhookEventRepository = webhookEventRepository;
         this.repositoryRepository = repositoryRepository;
+        this.analysisJobRepository = analysisJobRepository;
     }
 
     public WebhookResponse handleWebhook(GitHubWebhookRequest request){
