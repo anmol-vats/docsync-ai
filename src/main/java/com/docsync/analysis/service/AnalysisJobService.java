@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class AnalysisJobService {
@@ -29,5 +30,21 @@ public class AnalysisJobService {
         AnalysisJob analysisJob = job.get();
         analysisJob.markRunning(Instant.now());
         return Optional.of(analysisJob);
+    }
+
+    @Transactional
+    public void markJobSuccess(UUID jobId) {
+        AnalysisJob job = analysisJobRepository.findById(jobId)
+                .orElseThrow();
+
+        job.markSuccess(Instant.now());
+    }
+
+    @Transactional
+    public void markJobFailed(UUID jobId, String error) {
+        AnalysisJob job = analysisJobRepository.findById(jobId)
+                .orElseThrow();
+
+        job.markFailed(error, Instant.now());
     }
 }

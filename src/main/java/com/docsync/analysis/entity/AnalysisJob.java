@@ -32,6 +32,17 @@ public class AnalysisJob {
         this.startedAt = startedAt;
     }
 
+    public void markSuccess(Instant completedAt){
+        this.status = AnalysisJobStatus.SUCCESS;
+        this.completedAt = completedAt;
+    }
+
+    public void markFailed(String error, Instant completedAt) {
+        this.status = AnalysisJobStatus.FAILED;
+        this.lastError = error;
+        this.completedAt = completedAt;
+    }
+
 
     @Id
     @Column(nullable = false)
