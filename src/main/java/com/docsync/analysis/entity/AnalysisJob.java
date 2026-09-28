@@ -15,7 +15,7 @@ import java.util.UUID;
 public class AnalysisJob {
     protected AnalysisJob() {}
     public AnalysisJob(UUID id, WebhookEvent webhookEvent, AnalysisJobStatus status, Integer attemptCount,
-                       String lastError, Instant createdAt, Instant startedAt, Instant completedAt) {
+                       String lastError, Instant createdAt, Instant startedAt, Instant completedAt, String commitSha) {
         this.id = id;
         this.webhookEvent = webhookEvent;
         this.status = status;
@@ -24,6 +24,7 @@ public class AnalysisJob {
         this.createdAt = createdAt;
         this.startedAt = startedAt;
         this.completedAt = completedAt;
+        this.commitSha = commitSha;
     }
 
     public void markRunning(Instant startedAt){
@@ -67,4 +68,7 @@ public class AnalysisJob {
     private Instant startedAt;
 
     private Instant completedAt;
+
+    @Column(name = "commit_sha", nullable = false)
+    private String commitSha;
 }

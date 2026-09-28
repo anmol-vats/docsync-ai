@@ -21,13 +21,15 @@ public class Repository {
                       String name,
                       String url,
                       String defaultBranch,
-                      Instant createdAt) {
+                      Instant createdAt,
+                      String owner) {
         this.id = id;
         this.githubRepositoryId = githubRepositoryId;
         this.name = name;
         this.url = url;
         this.defaultBranch = defaultBranch;
         this.createdAt = createdAt;
+        this.owner = owner;
     }
 
 
@@ -48,4 +50,7 @@ public class Repository {
 
     @Column(name = "created_at",nullable = false)
     private Instant createdAt;
+
+    @Column(nullable = false)
+    private String owner;
 }

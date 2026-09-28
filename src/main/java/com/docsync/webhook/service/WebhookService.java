@@ -63,7 +63,8 @@ public class WebhookService {
                 null,
                 Instant.now(),
                 null,
-                null
+                null,
+                request.getCommitSha()
         );
 
         analysisJobRepository.save(analysisJob);

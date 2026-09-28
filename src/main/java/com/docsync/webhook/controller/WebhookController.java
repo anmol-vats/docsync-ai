@@ -44,6 +44,7 @@ public class WebhookController {
         request.setDeliveryId(deliveryId);
         request.setPayload(rawPayload);
         request.setEventType(eventType);
+        request.setCommitSha(payload.getAfter());
         WebhookResponse result = webhookService.handleWebhook(request);
         return result;
     }

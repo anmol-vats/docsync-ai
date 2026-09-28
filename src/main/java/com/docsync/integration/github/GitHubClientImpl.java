@@ -1,5 +1,6 @@
 package com.docsync.integration.github;
 
+import com.docsync.integration.dto.GitHubCommitResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -22,6 +23,26 @@ public class GitHubClientImpl implements GitHubClient {
                         return Optional.empty();
                     }else{
                         return Optional.of(response.bodyTo(GitHubRepositoryResponse.class));
+                    }
+                });
+    }
+
+    @Override
+    public Optional<GitHubCommitResponse> getCommit(
+            String owner,
+            String repo,
+            String commitSha
+    ) {
+        return restClient.get()
+                .uri("/repos/{owner}/{repo}/commits/{commitSha}",
+                        owner,
+                        repo,
+                        commitSha)
+                .exchange((request, response) -> {
+                    if(response.getStatusCode().value() == 404) {
+                        return Optional.empty();
+                    }else{
+                        return Optional.of(response.bodyTo(GitHubCommitResponse.class));
                     }
                 });
     }

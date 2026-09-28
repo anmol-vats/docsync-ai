@@ -49,7 +49,8 @@ public class RepositoryConnectionService {
                             gitHubRepository.getName(),
                             gitHubRepository.getUrl(),
                             gitHubRepository.getDefaultBranch(),
-                            Instant.now()
+                            Instant.now(),
+                            request.getOwner()
                     );
                     return repositoryRepository.save(newRepository);
                 });

@@ -10,4 +10,5 @@ public class GitHubWebhookRequest {
     private String eventType;
     private Long githubRepositoryId;
     private String payload;
+    private String commitSha;
 }
