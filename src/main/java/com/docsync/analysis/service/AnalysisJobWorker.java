@@ -1,6 +1,7 @@
 package com.docsync.analysis.service;
 
 import com.docsync.analysis.entity.AnalysisJob;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -30,6 +31,10 @@ public class AnalysisJobWorker {
                     e.getMessage()
             );
         }
+    }
 
+    @Scheduled(fixedDelay = 5000)
+    public void run() {
+        processNextJob();
     }
 }
