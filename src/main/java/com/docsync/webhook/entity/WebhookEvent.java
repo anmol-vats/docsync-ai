@@ -2,10 +2,12 @@ package com.docsync.webhook.entity;
 
 import com.docsync.repositorymanagement.entity.Repository;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.Instant;
 import java.util.UUID;
 
+@Getter
 @Entity
 @Table(name = "webhook_events")
 public class WebhookEvent {
@@ -42,7 +44,7 @@ public class WebhookEvent {
     @JoinColumn(name = "repository_id", nullable = false)
     private Repository repository;
 
-    @Column(name = "payload",  nullable = false)
+    @Column(name = "payload",  nullable = false, columnDefinition = "TEXT")
     private String payload;
 
     @Column(name = "received_at", nullable = false)

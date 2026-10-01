@@ -38,6 +38,13 @@ public class WebhookController {
             throw new InvalidWebhookPayloadException("Invalid GitHub webhook payload");
         }
 
+        if ("ping".equals(eventType)) {
+            WebhookResponse response = new WebhookResponse();
+            response.setStatus("SUCCESS");
+            response.setMessage("Webhook ping received");
+            return response;
+        }
+
         Long githubRepositoryId = payload.getRepository().getId();
         GitHubWebhookRequest request = new GitHubWebhookRequest();
         request.setGithubRepositoryId(githubRepositoryId);

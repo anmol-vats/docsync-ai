@@ -37,7 +37,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/users",
-                                "/auth/login"
+                                "/auth/login",
+                                "/webhooks/github"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
