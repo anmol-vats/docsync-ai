@@ -14,11 +14,13 @@ public class DocumentationImpactAnalyzer {
         this.fileClassifier = fileClassifier;
     }
 
-    public List<ImpactedDocumentation> findImpactedDocumentation(List<String> changedFiles) {
+    public List<ImpactedDocumentation> findImpactedDocumentation(
+            List<String> changedFiles,
+            List<String> repositoryFiles) {
 
         List<String> codeFiles = new ArrayList<>();
-        List<String> documentationFiles = new ArrayList<>();
         List<String> codeDomains = new ArrayList<>();
+
         List<ImpactedDocumentation> impactedDocumentation = new ArrayList<>();
 
         for (String changedFile : changedFiles) {
@@ -26,21 +28,27 @@ public class DocumentationImpactAnalyzer {
 
             if (fileType == FileType.CODE) {
                 codeFiles.add(changedFile);
-            } else if (fileType == FileType.DOCUMENTATION) {
-                documentationFiles.add(changedFile);
             }
         }
 
         for (String codeFile : codeFiles) {
             String className = extractClassName(codeFile);
             String domain = extractDomain(className);
+            System.out.println("Code domain: " + domain);
             codeDomains.add(domain);
         }
 
-        for (String documentationFile : documentationFiles) {
+        for (String repositoryFile : repositoryFiles) {
+
+            FileType fileType = fileClassifier.classify(repositoryFile);
+
+            if (fileType != FileType.DOCUMENTATION) {
+                continue;
+            }
 
             String documentationName =
-                    extractDocumentationName(documentationFile);
+                    extractDocumentationName(repositoryFile);
+            System.out.println("Documentation name: " + documentationName);
 
             for (String domain : codeDomains) {
 
@@ -50,15 +58,16 @@ public class DocumentationImpactAnalyzer {
 
                     impactedDocumentation.add(
                             new ImpactedDocumentation(
-                                    documentationFile,
+                                    repositoryFile,
                                     "Documentation potentially impacted by code change"
                             )
                     );
+
                     break;
                 }
             }
-
         }
+
         return impactedDocumentation;
     }
 

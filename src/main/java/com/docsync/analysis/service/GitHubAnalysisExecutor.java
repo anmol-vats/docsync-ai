@@ -34,6 +34,11 @@ public class GitHubAnalysisExecutor implements  AnalysisExecutor {
         String owner = repository.getOwner();
         String repo = repository.getName();
         String commitSha = analysisJob.getCommitSha();
+        List<String> repositoryFiles =
+                gitHubClient.getRepositoryFiles(owner, repo, commitSha);
+        repositoryFiles.forEach(file ->
+                System.out.println("Repository file: " + file)
+        );
         Optional<GitHubCommitResponse> response =
                 gitHubClient.getCommit(owner, repo, commitSha);
 
@@ -50,7 +55,7 @@ public class GitHubAnalysisExecutor implements  AnalysisExecutor {
                 .toList();
 
         List<ImpactedDocumentation> impactedDocumentation =
-                documentationImpactAnalyzer.findImpactedDocumentation(changedFilePaths);
+                documentationImpactAnalyzer.findImpactedDocumentation(changedFilePaths, repositoryFiles);
 
         Analysis analysis = new Analysis(
                 UUID.randomUUID(),
