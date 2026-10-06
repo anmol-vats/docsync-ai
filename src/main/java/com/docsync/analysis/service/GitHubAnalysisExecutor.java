@@ -4,6 +4,7 @@ import com.docsync.analysis.entity.Analysis;
 import com.docsync.analysis.entity.AnalysisJob;
 import com.docsync.analysis.entity.AnalysisRepository;
 import com.docsync.analysis.entity.ImpactedDocumentation;
+import com.docsync.analysis.impact.ChangedFile;
 import com.docsync.analysis.impact.DocumentationImpactAnalyzer;
 import com.docsync.integration.dto.GitHubCommitFileResponse;
 import com.docsync.integration.dto.GitHubCommitResponse;
@@ -50,18 +51,34 @@ public class GitHubAnalysisExecutor implements  AnalysisExecutor {
 
         List<GitHubCommitFileResponse> changedFiles =  commit.getFiles();
 
-        List<String> changedFilePaths = changedFiles.stream()
-                .map(GitHubCommitFileResponse::getFilename)
+        changedFiles.forEach(file ->
+                System.out.println(
+                        "File: " + file.getFilename()
+                                + "\nPatch: " + file.getPatch()
+                )
+        );
+
+//        List<String> changedFilePaths = changedFiles.stream()
+//                .map(GitHubCommitFileResponse::getFilename)
+//                .toList();
+
+        List<ChangedFile> changedFileDetails = changedFiles.stream()
+                .map(file -> new ChangedFile(
+                        file.getFilename(),
+                        file.getPatch()
+                ))
                 .toList();
 
         List<ImpactedDocumentation> impactedDocumentation =
-                documentationImpactAnalyzer.findImpactedDocumentation(changedFilePaths, repositoryFiles);
+                documentationImpactAnalyzer.findImpactedDocumentation(changedFileDetails, repositoryFiles);
+
+        boolean driftDetected = !impactedDocumentation.isEmpty();
 
         Analysis analysis = new Analysis(
                 UUID.randomUUID(),
                 repository,
                 commitSha,
-                false,
+                driftDetected,
                 Instant.now(),
                 impactedDocumentation
         );

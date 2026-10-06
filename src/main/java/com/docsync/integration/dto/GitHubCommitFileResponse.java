@@ -11,4 +11,5 @@ public class GitHubCommitFileResponse {
     private Integer additions;
     private Integer deletions;
     private Integer changes;
+    private String patch;
 }

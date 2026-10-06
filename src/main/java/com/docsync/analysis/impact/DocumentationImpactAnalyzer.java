@@ -9,13 +9,15 @@ import java.util.List;
 @Service
 public class DocumentationImpactAnalyzer {
     private final FileClassifier fileClassifier;
+    private final CodeChangeAnalyzer codeChangeAnalyzer;
 
-    public DocumentationImpactAnalyzer(FileClassifier fileClassifier) {
+    public DocumentationImpactAnalyzer(FileClassifier fileClassifier, CodeChangeAnalyzer codeChangeAnalyzer) {
         this.fileClassifier = fileClassifier;
+        this.codeChangeAnalyzer = codeChangeAnalyzer;
     }
 
     public List<ImpactedDocumentation> findImpactedDocumentation(
-            List<String> changedFiles,
+            List<ChangedFile> changedFiles,
             List<String> repositoryFiles) {
 
         List<String> codeFiles = new ArrayList<>();
@@ -23,12 +25,22 @@ public class DocumentationImpactAnalyzer {
 
         List<ImpactedDocumentation> impactedDocumentation = new ArrayList<>();
 
-        for (String changedFile : changedFiles) {
-            FileType fileType = fileClassifier.classify(changedFile);
 
-            if (fileType == FileType.CODE) {
-                codeFiles.add(changedFile);
+        for (ChangedFile changedFile : changedFiles) {
+
+            FileType fileType =
+                    fileClassifier.classify(changedFile.path());
+
+            if (fileType != FileType.CODE) {
+                continue;
             }
+
+            if (!codeChangeAnalyzer.canAffectDocumentation(
+                    changedFile.patch())) {
+                continue;
+            }
+
+            codeFiles.add(changedFile.path());
         }
 
         for (String codeFile : codeFiles) {
