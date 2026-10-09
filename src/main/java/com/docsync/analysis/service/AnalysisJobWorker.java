@@ -26,6 +26,9 @@ public class AnalysisJobWorker {
             analysisExecutor.execute(analysisJob);
             analysisJobService.markJobSuccess(analysisJob.getId());
         } catch (Exception e) {
+
+            e.printStackTrace();
+
             analysisJobService.markJobFailed(
                     analysisJob.getId(),
                     e.getMessage()

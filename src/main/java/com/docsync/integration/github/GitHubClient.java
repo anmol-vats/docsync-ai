@@ -13,4 +13,10 @@ public interface GitHubClient {
             String repo,
             String commitSha
     );
+    String getFileContent(
+            String owner,
+            String repo,
+            String path,
+            String commitSha
+    );
 }

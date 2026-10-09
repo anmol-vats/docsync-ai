@@ -22,11 +22,13 @@ public class GitHubAnalysisExecutor implements  AnalysisExecutor {
     private final GitHubClient gitHubClient;
     private final AnalysisRepository analysisRepository;
     private final DocumentationImpactAnalyzer documentationImpactAnalyzer;
+    private final DocumentationProposalService documentationProposalService;
 
-    public GitHubAnalysisExecutor(GitHubClient gitHubClient, AnalysisRepository analysisRepository, DocumentationImpactAnalyzer documentationImpactAnalyzer) {
+    public GitHubAnalysisExecutor(GitHubClient gitHubClient, AnalysisRepository analysisRepository, DocumentationImpactAnalyzer documentationImpactAnalyzer, DocumentationProposalService documentationProposalService) {
         this.gitHubClient = gitHubClient;
         this.analysisRepository = analysisRepository;
         this.documentationImpactAnalyzer = documentationImpactAnalyzer;
+        this.documentationProposalService = documentationProposalService;
     }
 
     @Override
@@ -35,6 +37,7 @@ public class GitHubAnalysisExecutor implements  AnalysisExecutor {
         String owner = repository.getOwner();
         String repo = repository.getName();
         String commitSha = analysisJob.getCommitSha();
+
         List<String> repositoryFiles =
                 gitHubClient.getRepositoryFiles(owner, repo, commitSha);
         repositoryFiles.forEach(file ->
@@ -82,7 +85,20 @@ public class GitHubAnalysisExecutor implements  AnalysisExecutor {
                 Instant.now(),
                 impactedDocumentation
         );
-        analysisRepository.save(analysis);
+//        analysisRepository.save(analysis);
+        Analysis savedAnalysis = analysisRepository.save(analysis);
+        System.out.println(
+                "Analysis saved. Drift detected: "
+                        + savedAnalysis.isDriftDetected()
+        );
+
+        System.out.println(
+                "Impacted docs: "
+                        + savedAnalysis.getImpactedDocumentation().size()
+        );
+
+
+        documentationProposalService.generateProposal(savedAnalysis);
     }
 
 }
