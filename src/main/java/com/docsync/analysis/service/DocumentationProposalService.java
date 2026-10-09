@@ -1,6 +1,7 @@
 package com.docsync.analysis.service;
 
 import com.docsync.analysis.entity.*;
+import com.docsync.analysis.impact.ChangedFile;
 import com.docsync.analysis.repository.DocumentationProposalRepository;
 import com.docsync.integration.github.GitHubClient;
 import com.docsync.repositorymanagement.entity.Repository;
@@ -9,7 +10,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class DocumentationProposalService {
@@ -19,21 +22,25 @@ public class DocumentationProposalService {
     private final GitHubClient gitHubClient;
     private final RepositoryRepository repositoryRepository;
     private final AnalysisRepository analysisRepository;
+    private final DocumentationProposalGenerator documentationProposalGenerator;
 
     public DocumentationProposalService(
             DocumentationProposalRepository documentationProposalRepository,
             ProposalChangeRepository proposalChangeRepository,
-            GitHubClient gitHubClient, RepositoryRepository repositoryRepository, AnalysisRepository analysisRepository
+            GitHubClient gitHubClient, RepositoryRepository repositoryRepository, AnalysisRepository analysisRepository, DocumentationProposalGenerator documentationProposalGenerator
     ) {
         this.documentationProposalRepository = documentationProposalRepository;
         this.proposalChangeRepository = proposalChangeRepository;
         this.gitHubClient = gitHubClient;
         this.repositoryRepository = repositoryRepository;
         this.analysisRepository = analysisRepository;
+        this.documentationProposalGenerator = documentationProposalGenerator;
     }
 
     @Transactional
-    public DocumentationProposal generateProposal(Analysis analysis) {
+    public DocumentationProposal generateProposal(
+            Analysis analysis,
+            List<ChangedFile> changedFiles) {
         System.out.println("GENERATE PROPOSAL CALLED");
 
         Analysis managedAnalysis = analysisRepository
@@ -76,6 +83,11 @@ public class DocumentationProposalService {
                 "Impacted docs count: "
                         + analysis.getImpactedDocumentation().size()
         );
+        String codeChanges = changedFiles.stream()
+                .filter(file -> file.patch() != null)
+                .map(file -> "File: " + file.path()
+                        + "\nPatch:\n" + file.patch())
+                .collect(Collectors.joining("\n\n"));
 
         for (ImpactedDocumentation impactedDocumentation
                 : analysis.getImpactedDocumentation()) {
@@ -97,7 +109,11 @@ public class DocumentationProposalService {
                     );
 
             String proposedContent =
-                    originalContent + "\n\n<!-- DocSync proposal -->";
+                    documentationProposalGenerator.generateProposal(
+                            documentationPath,
+                            originalContent,
+                            codeChanges
+                    );
 
             ProposalChange proposalChange =
                     new ProposalChange(

@@ -98,7 +98,7 @@ public class GitHubAnalysisExecutor implements  AnalysisExecutor {
         );
 
 
-        documentationProposalService.generateProposal(savedAnalysis);
+        documentationProposalService.generateProposal(savedAnalysis, changedFileDetails);
     }
 
 }
