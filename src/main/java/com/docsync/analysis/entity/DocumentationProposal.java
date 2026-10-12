@@ -47,4 +47,36 @@ public class DocumentationProposal {
     private Instant createdAt;
 
     private Instant reviewedAt;
+
+    public void markPendingReview() {
+        if (this.status != ProposalStatus.GENERATED) {
+            throw new IllegalStateException(
+                    "Only generated proposals can enter review"
+            );
+        }
+
+        this.status = ProposalStatus.PENDING_REVIEW;
+    }
+
+    public void approve() {
+        requirePendingReview();
+
+        this.status = ProposalStatus.APPROVED;
+        this.reviewedAt = Instant.now();
+    }
+
+    public void reject() {
+        requirePendingReview();
+
+        this.status = ProposalStatus.REJECTED;
+        this.reviewedAt = Instant.now();
+    }
+
+    private void requirePendingReview() {
+        if (this.status != ProposalStatus.PENDING_REVIEW) {
+            throw new IllegalStateException(
+                    "Proposal must be pending review"
+            );
+        }
+    }
 }

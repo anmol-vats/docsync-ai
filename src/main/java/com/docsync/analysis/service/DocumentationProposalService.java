@@ -127,6 +127,8 @@ public class DocumentationProposalService {
 
             proposalChangeRepository.save(proposalChange);
         }
+        proposal.markPendingReview();
+        proposal = documentationProposalRepository.save(proposal);
 
         return proposal;
     }

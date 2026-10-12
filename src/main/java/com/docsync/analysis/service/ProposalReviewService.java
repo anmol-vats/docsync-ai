@@ -58,4 +58,46 @@ public class ProposalReviewService {
                 changes
         );
     }
+
+    @Transactional
+    public void approveProposal(UUID proposalId) {
+        DocumentationProposal proposal = proposalRepository
+                .findById(proposalId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Documentation proposal not found"
+                ));
+
+        try {
+            proposal.approve();
+        } catch (IllegalStateException exception) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    exception.getMessage()
+            );
+        }
+
+        proposalRepository.save(proposal);
+    }
+
+    @Transactional
+    public void rejectProposal(UUID proposalId) {
+        DocumentationProposal proposal = proposalRepository
+                .findById(proposalId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Documentation proposal not found"
+                ));
+
+        try {
+            proposal.reject();
+        } catch (IllegalStateException exception) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    exception.getMessage()
+            );
+        }
+
+        proposalRepository.save(proposal);
+    }
 }

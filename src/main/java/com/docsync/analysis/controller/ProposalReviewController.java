@@ -25,4 +25,18 @@ public class ProposalReviewController {
     ) {
         return proposalReviewService.getProposal(proposalId);
     }
+
+    @PostMapping("/{proposalId}/approve")
+    public void approveProposal(
+            @PathVariable UUID proposalId
+    ) {
+        proposalReviewService.approveProposal(proposalId);
+    }
+
+    @PostMapping("/{proposalId}/reject")
+    public void rejectProposal(
+            @PathVariable UUID proposalId
+    ) {
+        proposalReviewService.rejectProposal(proposalId);
+    }
 }
