@@ -1,9 +1,6 @@
 package com.docsync.integration.github;
 
-import com.docsync.integration.dto.GitHubCommitResponse;
-import com.docsync.integration.dto.GitHubContentResponse;
-import com.docsync.integration.dto.GitHubTreeItemResponse;
-import com.docsync.integration.dto.GitHubTreeResponse;
+import com.docsync.integration.dto.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -118,4 +115,61 @@ public class GitHubClientImpl implements GitHubClient {
                 StandardCharsets.UTF_8
         );
     }
+
+
+    @Override
+    public Optional<String> getDefaultBranchHeadSha(
+            String owner,
+            String repo
+    ) {
+        Optional<GitHubRepositoryResponse> repositoryResponse =
+                getRepository(owner, repo);
+
+        if (repositoryResponse.isEmpty()) {
+            System.out.println("DEBUG: Repository metadata not found");
+            return Optional.empty();
+        }
+
+        String defaultBranch =
+                repositoryResponse.get().getDefaultBranch();
+        System.out.println("DEBUG: Default branch = " + defaultBranch);
+
+        if (defaultBranch == null || defaultBranch.isBlank()) {
+            return Optional.empty();
+        }
+
+        Optional<GitHubBranchResponse> branchResponse =
+                restClient.get()
+                        .uri(
+                                "/repos/{owner}/{repo}/branches/{branch}",
+                                owner,
+                                repo,
+                                defaultBranch
+                        )
+                        .exchange((request, response) -> {
+                            if (response.getStatusCode().value() == 404) {
+                                System.out.println("response in 404");
+                                return Optional.empty();
+                            }
+
+                            if (!response.getStatusCode().is2xxSuccessful()) {
+                                throw new IllegalStateException(
+                                        "GitHub API request failed: "
+                                                + response.getStatusCode()
+                                );
+                            }
+
+                            return Optional.ofNullable(
+                                    response.bodyTo(
+                                            GitHubBranchResponse.class
+                                    )
+                            );
+                        });
+
+        return branchResponse
+                .map(GitHubBranchResponse::getCommit)
+                .map(GitHubBranchResponse.Commit::getSha)
+                .filter(sha -> !sha.isBlank());
+    }
+
 }

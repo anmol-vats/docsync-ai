@@ -57,6 +57,7 @@ public class AnalysisServiceTest {
                 null,
                 Instant.now(),
                 null,
+                null,
                 null
         );
 

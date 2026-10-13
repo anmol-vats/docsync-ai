@@ -79,7 +79,9 @@ public class RepositoryConnectionServiceTest {
                 response.getName(),
                 response.getUrl(),
                 response.getDefaultBranch(),
-                Instant.now()
+                Instant.now(),
+                "octocat"
+
         );
 
         when(repositoryRepository.save(any(Repository.class)))
@@ -173,7 +175,8 @@ public class RepositoryConnectionServiceTest {
                 response.getName(),
                 response.getUrl(),
                 response.getDefaultBranch(),
-                Instant.now()
+                Instant.now(),
+                "octocat"
         );
 
         when(repositoryRepository.findByGithubRepositoryId(response.getId()))

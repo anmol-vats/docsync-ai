@@ -63,7 +63,8 @@ public class WebhookServiceTest {
                 "Hello-World",
                 "https://github.com/octocat/Hello-World",
                 "master",
-                Instant.now()
+                Instant.now(),
+                "octocat"
         );
 
         when(repositoryRepository.findByGithubRepositoryId(request.getGithubRepositoryId()))

@@ -19,4 +19,8 @@ public interface GitHubClient {
             String path,
             String commitSha
     );
+    Optional<String> getDefaultBranchHeadSha(
+            String owner,
+            String repo
+    );
 }
