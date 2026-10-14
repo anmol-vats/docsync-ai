@@ -79,4 +79,15 @@ public class DocumentationProposal {
             );
         }
     }
+
+    public void markStale() {
+        if (this.status != ProposalStatus.PENDING_REVIEW
+                && this.status != ProposalStatus.APPROVED) {
+            throw new IllegalStateException(
+                    "Only pending or approved proposals can become stale"
+            );
+        }
+
+        this.status = ProposalStatus.STALE;
+    }
 }

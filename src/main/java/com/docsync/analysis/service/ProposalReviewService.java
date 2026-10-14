@@ -3,15 +3,17 @@ package com.docsync.analysis.service;
 
 import com.docsync.analysis.dto.ProposalReviewResponse;
 import com.docsync.analysis.entity.DocumentationProposal;
-import com.docsync.analysis.entity.ProposalChange;
 import com.docsync.analysis.entity.ProposalChangeRepository;
 import com.docsync.analysis.repository.DocumentationProposalRepository;
+import com.docsync.integration.github.GitHubClient;
+import com.docsync.repositorymanagement.entity.Repository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -19,13 +21,15 @@ public class ProposalReviewService {
 
     private final DocumentationProposalRepository proposalRepository;
     private final ProposalChangeRepository changeRepository;
+    private final GitHubClient gitHubClient;
 
     public ProposalReviewService(
             DocumentationProposalRepository proposalRepository,
-            ProposalChangeRepository changeRepository
+            ProposalChangeRepository changeRepository, GitHubClient gitHubClient
     ) {
         this.proposalRepository = proposalRepository;
         this.changeRepository = changeRepository;
+        this.gitHubClient = gitHubClient;
     }
 
     @Transactional(readOnly = true)
@@ -59,7 +63,7 @@ public class ProposalReviewService {
         );
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = ResponseStatusException.class)
     public void approveProposal(UUID proposalId) {
         DocumentationProposal proposal = proposalRepository
                 .findById(proposalId)
@@ -67,6 +71,8 @@ public class ProposalReviewService {
                         HttpStatus.NOT_FOUND,
                         "Documentation proposal not found"
                 ));
+
+        validateProposalFreshness(proposal);
 
         try {
             proposal.approve();
@@ -99,5 +105,46 @@ public class ProposalReviewService {
         }
 
         proposalRepository.save(proposal);
+    }
+
+    private void validateProposalFreshness(
+            DocumentationProposal proposal
+    ) {
+        Repository repository =
+                proposal.getAnalysis().getRepository();
+
+        Optional<String> currentHeadSha;
+
+        try {
+            currentHeadSha = gitHubClient.getDefaultBranchHeadSha(
+                    repository.getOwner(),
+                    repository.getName()
+            );
+        } catch (RuntimeException exception) {
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "Could not verify repository freshness. Please retry.",
+                    exception
+            );
+        }
+
+        if (currentHeadSha.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "Could not verify repository freshness. Please retry."
+            );
+        }
+
+        if (!proposal.getSourceCommitSha()
+                .equalsIgnoreCase(currentHeadSha.get())) {
+
+            proposal.markStale();
+            proposalRepository.save(proposal);
+
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Proposal is stale because the default branch has changed."
+            );
+        }
     }
 }
