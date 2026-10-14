@@ -1,6 +1,7 @@
 package com.docsync.integration.github;
 
 import com.docsync.integration.dto.*;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -171,5 +172,35 @@ public class GitHubClientImpl implements GitHubClient {
                 .map(GitHubBranchResponse.Commit::getSha)
                 .filter(sha -> !sha.isBlank());
     }
+
+
+    @Override
+    public void createBranch(
+            String owner,
+            String repo,
+            String branchName,
+            String sourceSha
+    ) {
+        if (branchName == null || branchName.isBlank()
+                || sourceSha == null || sourceSha.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Branch name and source SHA are required"
+            );
+        }
+
+        GitHubCreateRefRequest request =
+                new GitHubCreateRefRequest(
+                        "refs/heads/" + branchName,
+                        sourceSha
+                );
+
+        restClient.post()
+                .uri("/repos/{owner}/{repo}/git/refs", owner, repo)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .toBodilessEntity();
+    }
+
 
 }

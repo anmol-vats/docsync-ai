@@ -23,4 +23,12 @@ public interface GitHubClient {
             String owner,
             String repo
     );
+
+    void createBranch(
+            String owner,
+            String repo,
+            String branchName,
+            String sourceSha
+    );
+
 }
