@@ -48,6 +48,9 @@ public class DocumentationProposal {
 
     private Instant reviewedAt;
 
+    @Column(name = "pull_request_url")
+    private String pullRequestUrl;
+
     public void markPendingReview() {
         if (this.status != ProposalStatus.GENERATED) {
             throw new IllegalStateException(
@@ -89,5 +92,22 @@ public class DocumentationProposal {
         }
 
         this.status = ProposalStatus.STALE;
+    }
+
+    public void markPrCreated(String pullRequestUrl) {
+        if (this.status != ProposalStatus.APPROVED) {
+            throw new IllegalStateException(
+                    "Only approved proposals can create a pull request"
+            );
+        }
+
+        if (pullRequestUrl == null || pullRequestUrl.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Pull request URL must not be blank"
+            );
+        }
+
+        this.pullRequestUrl = pullRequestUrl;
+        this.status = ProposalStatus.PR_CREATED;
     }
 }

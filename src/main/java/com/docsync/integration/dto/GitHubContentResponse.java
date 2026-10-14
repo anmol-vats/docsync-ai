@@ -8,4 +8,5 @@ import lombok.Setter;
 public class GitHubContentResponse {
     private String content;
     private String encoding;
+    private String sha;
 }
