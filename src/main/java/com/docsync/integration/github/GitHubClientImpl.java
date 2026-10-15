@@ -203,4 +203,75 @@ public class GitHubClientImpl implements GitHubClient {
     }
 
 
+    @Override
+    public Optional<GitHubContentResponse> getFileDetails(
+            String owner,
+            String repo,
+            String path,
+            String ref
+    ) {
+        return restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/repos/{owner}/{repo}/contents/{path}")
+                        .queryParam("ref", ref)
+                        .build(owner, repo, path))
+                .exchange((request, response) -> {
+                    if (response.getStatusCode().value() == 404) {
+                        return Optional.empty();
+                    }
+
+                    if (!response.getStatusCode().is2xxSuccessful()) {
+                        throw new IllegalStateException(
+                                "GitHub file lookup failed: HTTP "
+                                        + response.getStatusCode().value()
+                        );
+                    }
+
+                    GitHubContentResponse file =
+                            response.bodyTo(GitHubContentResponse.class);
+
+                    return Optional.ofNullable(file);
+                });
+    }
+
+    @Override
+    public void updateFile(
+            String owner,
+            String repo,
+            String path,
+            String branch,
+            String content,
+            String fileSha,
+            String commitMessage
+    ) {
+        if (branch == null || branch.isBlank()
+                || fileSha == null || fileSha.isBlank()
+                || content == null
+                || commitMessage == null || commitMessage.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Branch, file SHA, content, and commit message are required"
+            );
+        }
+
+        String encodedContent = Base64.getEncoder().encodeToString(
+                content.getBytes(StandardCharsets.UTF_8)
+        );
+
+        GitHubUpdateFileRequest request = new GitHubUpdateFileRequest(
+                commitMessage,
+                encodedContent,
+                branch,
+                fileSha
+        );
+
+        restClient.put()
+                .uri("/repos/{owner}/{repo}/contents/{path}",
+                        owner, repo, path)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+
 }
