@@ -2,6 +2,7 @@ package com.docsync.integration.github;
 
 import com.docsync.integration.dto.GitHubCommitResponse;
 import com.docsync.integration.dto.GitHubContentResponse;
+import com.docsync.integration.dto.GitHubPullRequestResponse;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,5 +50,14 @@ public interface GitHubClient {
             String commitMessage
     );
 
+
+    GitHubPullRequestResponse createPullRequest(
+            String owner,
+            String repo,
+            String title,
+            String headBranch,
+            String baseBranch,
+            String body
+    );
 
 }

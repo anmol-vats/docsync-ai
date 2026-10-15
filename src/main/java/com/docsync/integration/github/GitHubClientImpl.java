@@ -273,5 +273,37 @@ public class GitHubClientImpl implements GitHubClient {
                 .toBodilessEntity();
     }
 
+    @Override
+    public GitHubPullRequestResponse createPullRequest(
+            String owner,
+            String repo,
+            String title,
+            String headBranch,
+            String baseBranch,
+            String body
+    ) {
+        if (title == null || title.isBlank()
+                || headBranch == null || headBranch.isBlank()
+                || baseBranch == null || baseBranch.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Title, head branch, and base branch are required"
+            );
+        }
+
+        GitHubCreatePullRequestRequest request =
+                new GitHubCreatePullRequestRequest(
+                        title,
+                        headBranch,
+                        baseBranch,
+                        body == null ? "" : body
+                );
+
+        return restClient.post()
+                .uri("/repos/{owner}/{repo}/pulls", owner, repo)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .body(GitHubPullRequestResponse.class);
+    }
 
 }
