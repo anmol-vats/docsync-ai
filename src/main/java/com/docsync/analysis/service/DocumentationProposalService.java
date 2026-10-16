@@ -3,6 +3,7 @@ package com.docsync.analysis.service;
 import com.docsync.analysis.entity.*;
 import com.docsync.analysis.impact.ChangedFile;
 import com.docsync.analysis.repository.DocumentationProposalRepository;
+import com.docsync.analysis.repository.ProposalChangeRepository;
 import com.docsync.integration.github.GitHubClient;
 import com.docsync.repositorymanagement.entity.Repository;
 import com.docsync.repositorymanagement.repository.RepositoryRepository;

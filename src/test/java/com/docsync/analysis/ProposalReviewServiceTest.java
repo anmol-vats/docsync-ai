@@ -2,9 +2,9 @@ package com.docsync.analysis;
 
 import com.docsync.analysis.entity.Analysis;
 import com.docsync.analysis.entity.DocumentationProposal;
-import com.docsync.analysis.entity.ProposalChangeRepository;
 import com.docsync.analysis.entity.ProposalStatus;
 import com.docsync.analysis.repository.DocumentationProposalRepository;
+import com.docsync.analysis.repository.ProposalChangeRepository;
 import com.docsync.analysis.service.ProposalReviewService;
 import com.docsync.integration.github.GitHubClient;
 import com.docsync.repositorymanagement.entity.Repository;

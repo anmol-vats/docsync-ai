@@ -3,8 +3,8 @@ package com.docsync.analysis.service;
 
 import com.docsync.analysis.dto.ProposalReviewResponse;
 import com.docsync.analysis.entity.DocumentationProposal;
-import com.docsync.analysis.entity.ProposalChangeRepository;
 import com.docsync.analysis.repository.DocumentationProposalRepository;
+import com.docsync.analysis.repository.ProposalChangeRepository;
 import com.docsync.integration.github.GitHubClient;
 import com.docsync.repositorymanagement.entity.Repository;
 import org.springframework.http.HttpStatus;
