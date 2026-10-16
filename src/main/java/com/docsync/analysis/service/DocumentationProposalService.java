@@ -49,7 +49,7 @@ public class DocumentationProposalService {
                         new RuntimeException("Analysis not found")
                 );
 
-        if (!analysis.isDriftDetected()) {
+        if (!managedAnalysis.isDriftDetected()) {
             return null;
         }
 
@@ -58,7 +58,7 @@ public class DocumentationProposalService {
                         UUID.randomUUID(),
                         analysis,
                         ProposalStatus.GENERATED,
-                        analysis.getSourceCommitSha(),
+                        managedAnalysis.getSourceCommitSha(),
                         Instant.now(),
                         null
                 );
