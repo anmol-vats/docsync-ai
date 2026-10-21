@@ -56,6 +56,7 @@ public class PullRequestCreationService {
         String sourceSha = proposal.getSourceCommitSha();
 
         String defaultBranch = getDefaultBranch(owner, repo);
+
         verifyFreshness(proposal, owner, repo, sourceSha);
 
         List<ProposalChange> changes =
@@ -77,12 +78,8 @@ public class PullRequestCreationService {
                 gitHubClient.getBranchHeadSha(owner, repo, branchName);
 
         if (existingBranchSha.isEmpty()) {
-            gitHubClient.createBranch(owner, repo, branchName, sourceSha);
-        } else if (!existingBranchSha.get().equals(sourceSha)) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Proposal branch exists at an unexpected commit. "
-                            + "Manual investigation is required."
+            gitHubClient.createBranch(
+                    owner, repo, branchName, sourceSha
             );
         }
 
@@ -100,11 +97,15 @@ public class PullRequestCreationService {
                     owner, repo, path, branchName
             );
 
+            if (currentContent.equals(change.getProposedContent())) {
+                continue;
+            }
+
             if (!currentContent.equals(change.getOriginalContent())) {
                 throw new ResponseStatusException(
                         HttpStatus.CONFLICT,
-                        "Documentation changed since proposal generation: "
-                                + path
+                        "Documentation content differs from both original "
+                                + "and proposed content: " + path
                 );
             }
 
@@ -121,16 +122,26 @@ public class PullRequestCreationService {
 
         verifyFreshness(proposal, owner, repo, sourceSha);
 
-        GitHubPullRequestResponse response =
-                gitHubClient.createPullRequest(
-                        owner,
-                        repo,
-                        "docs: update documentation via DocSync AI",
-                        branchName,
-                        defaultBranch,
-                        "Generated from approved DocSync AI proposal "
-                                + proposalId
+        Optional<GitHubPullRequestResponse> existingPr =
+                gitHubClient.findOpenPullRequest(
+                        owner, repo, branchName, defaultBranch
                 );
+
+        GitHubPullRequestResponse response;
+
+        if (existingPr.isPresent()) {
+            response = existingPr.get();
+        } else {
+            response = gitHubClient.createPullRequest(
+                    owner,
+                    repo,
+                    "docs: update documentation via DocSync AI",
+                    branchName,
+                    defaultBranch,
+                    "Generated from approved DocSync AI proposal "
+                            + proposalId
+            );
+        }
 
         proposal.markPrCreated(response.htmlUrl());
         proposalRepository.save(proposal);

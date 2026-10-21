@@ -1,6 +1,7 @@
 package com.docsync.integration.github;
 
 import com.docsync.integration.dto.*;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -332,6 +333,29 @@ public class GitHubClientImpl implements GitHubClient {
             }
             throw ex;
         }
+    }
+
+    @Override
+    public Optional<GitHubPullRequestResponse> findOpenPullRequest(
+            String owner,
+            String repo,
+            String headBranch,
+            String baseBranch
+    ) {
+        List<GitHubPullRequestResponse> pullRequests = restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/repos/{owner}/{repo}/pulls")
+                        .queryParam("state", "open")
+                        .queryParam("head", owner + ":" + headBranch)
+                        .queryParam("base", baseBranch)
+                        .build(owner, repo))
+                .retrieve()
+                .body(new ParameterizedTypeReference<
+                                        List<GitHubPullRequestResponse>>() {});
+
+        return pullRequests == null
+                ? Optional.empty()
+                : pullRequests.stream().findFirst();
     }
 
 }

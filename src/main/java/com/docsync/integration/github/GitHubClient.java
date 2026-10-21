@@ -66,4 +66,11 @@ public interface GitHubClient {
             String branchName
     );
 
+    Optional<GitHubPullRequestResponse> findOpenPullRequest(
+            String owner,
+            String repo,
+            String headBranch,
+            String baseBranch
+    );
+
 }
