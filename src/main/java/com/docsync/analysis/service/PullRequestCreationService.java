@@ -67,8 +67,7 @@ public class PullRequestCreationService {
             );
         }
 
-        String branchName = "docsync-ai/proposal-"
-                + proposalId + "-" + UUID.randomUUID();
+        String branchName = "docsync-ai/proposal-" + proposalId;
 
         gitHubClient.createBranch(
                 owner, repo, branchName, sourceSha

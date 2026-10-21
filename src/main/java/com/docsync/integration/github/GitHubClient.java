@@ -60,4 +60,10 @@ public interface GitHubClient {
             String body
     );
 
+    Optional<String> getBranchHeadSha(
+            String owner,
+            String repo,
+            String branchName
+    );
+
 }

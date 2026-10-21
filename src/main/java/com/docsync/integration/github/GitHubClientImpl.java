@@ -4,6 +4,8 @@ import com.docsync.integration.dto.*;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
+import tools.jackson.databind.JsonNode;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -304,6 +306,32 @@ public class GitHubClientImpl implements GitHubClient {
                 .body(request)
                 .retrieve()
                 .body(GitHubPullRequestResponse.class);
+    }
+
+    @Override
+    public Optional<String> getBranchHeadSha(
+            String owner,
+            String repo,
+            String branchName
+    ) {
+        try {
+            return Optional.ofNullable(
+                            restClient.get()
+                                    .uri(
+                                            "/repos/{owner}/{repo}/branches/{branch}",
+                                            owner, repo, branchName
+                                    )
+                                    .retrieve()
+                                    .body(JsonNode.class)
+                    ).map(body -> body.path("commit").path("sha").asText())
+                    .filter(sha -> !sha.isBlank());
+
+        } catch (RestClientResponseException ex) {
+            if (ex.getStatusCode().value() == 404) {
+                return Optional.empty();
+            }
+            throw ex;
+        }
     }
 
 }
