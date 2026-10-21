@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -69,9 +70,21 @@ public class PullRequestCreationService {
 
         String branchName = "docsync-ai/proposal-" + proposalId;
 
-        gitHubClient.createBranch(
-                owner, repo, branchName, sourceSha
-        );
+//        gitHubClient.createBranch(
+//                owner, repo, branchName, sourceSha
+//        );
+        Optional<String> existingBranchSha =
+                gitHubClient.getBranchHeadSha(owner, repo, branchName);
+
+        if (existingBranchSha.isEmpty()) {
+            gitHubClient.createBranch(owner, repo, branchName, sourceSha);
+        } else if (!existingBranchSha.get().equals(sourceSha)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Proposal branch exists at an unexpected commit. "
+                            + "Manual investigation is required."
+            );
+        }
 
         for (ProposalChange change : changes) {
             String path = change.getDocumentationPath();
