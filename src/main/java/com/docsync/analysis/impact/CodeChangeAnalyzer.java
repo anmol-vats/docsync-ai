@@ -4,34 +4,36 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CodeChangeAnalyzer {
-    public boolean canAffectDocumentation(String patch) {
 
+    public boolean canAffectDocumentation(String patch) {
         if (patch == null || patch.isBlank()) {
             return false;
         }
 
         String[] lines = patch.split("\n");
+        boolean foundMeaningfulChange = false;
 
         for (String line : lines) {
-
             if (!isChangedCodeLine(line)) {
                 continue;
             }
 
             String changedLine = line.substring(1).trim();
 
-            if (isIgnorableChange(changedLine)) {
+            if (changedLine.isBlank() || isIgnorableChange(changedLine)) {
                 continue;
             }
 
-            return true;
+            foundMeaningfulChange = true;
         }
 
-        return false;
+        return foundMeaningfulChange;
     }
 
     private boolean isIgnorableChange(String line) {
-        return line.contains("System.out.println");
+        return line.contains("System.out.println(")
+                || line.contains("System.err.println(")
+                || line.matches(".*\\b(log|logger)\\.(debug|info|warn|error|trace)\\s*\\(.*");
     }
 
     private boolean isChangedCodeLine(String line) {
