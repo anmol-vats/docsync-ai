@@ -90,6 +90,7 @@ public class DocumentationProposalService {
                         + "\nPatch:\n" + file.patch())
                 .collect(Collectors.joining("\n\n"));
 
+        int savedChanges = 0;
         for (ImpactedDocumentation impactedDocumentation
                 : analysis.getImpactedDocumentation()) {
 
@@ -109,12 +110,30 @@ public class DocumentationProposalService {
                             commitSha
                     );
 
+
             String proposedContent =
                     documentationProposalGenerator.generateProposal(
                             documentationPath,
                             originalContent,
                             codeChanges
                     );
+
+            String normalizedOriginal = originalContent
+                    .replace("\r\n", "\n")
+                    .replace("\r", "\n")
+                    .stripTrailing();
+
+            String normalizedProposed = proposedContent
+                    .replace("\r\n", "\n")
+                    .replace("\r", "\n")
+                    .stripTrailing();
+
+            if (normalizedOriginal.equals(normalizedProposed)) {
+                System.out.println(
+                        "Skipping unchanged documentation: " + documentationPath
+                );
+                continue;
+            }
 
             ProposalChange proposalChange =
                     new ProposalChange(
@@ -125,8 +144,18 @@ public class DocumentationProposalService {
                             proposedContent
                     );
 
-
             proposalChangeRepository.save(proposalChange);
+            savedChanges++;
+
+        }
+        if (savedChanges == 0) {
+            documentationProposalRepository.delete(proposal);
+
+            System.out.println(
+                    "No meaningful documentation changes found. Proposal discarded."
+            );
+
+            return null;
         }
         proposal.markPendingReview();
         proposal = documentationProposalRepository.save(proposal);
