@@ -117,6 +117,12 @@ public class DocumentationProposalService {
                             originalContent,
                             codeChanges
                     );
+            if (proposedContent == null || proposedContent.isBlank()) {
+                throw new IllegalStateException(
+                        "Documentation generator returned empty content for: "
+                                + documentationPath
+                );
+            }
 
             String normalizedOriginal = originalContent
                     .replace("\r\n", "\n")
