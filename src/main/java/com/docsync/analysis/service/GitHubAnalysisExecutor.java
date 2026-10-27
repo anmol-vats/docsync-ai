@@ -98,7 +98,15 @@ public class GitHubAnalysisExecutor implements  AnalysisExecutor {
         );
 
 
-        documentationProposalService.generateProposal(savedAnalysis, changedFileDetails);
+//        documentationProposalService.generateProposal(savedAnalysis, changedFileDetails);
+        if (savedAnalysis.isDriftDetected()
+                && !savedAnalysis.getImpactedDocumentation().isEmpty()) {
+
+            documentationProposalService.generateProposal(
+                    savedAnalysis,
+                    changedFileDetails
+            );
+        }
     }
 
 }

@@ -123,6 +123,16 @@ public class DocumentationProposalService {
                                 + documentationPath
                 );
             }
+            String trimmedContent = proposedContent.stripLeading();
+
+            if (trimmedContent.startsWith("[")
+                    || trimmedContent.startsWith("{")
+                    || trimmedContent.contains("\"op\": \"replace\"")) {
+                throw new IllegalStateException(
+                        "Documentation generator returned structured patch data instead of Markdown for: "
+                                + documentationPath
+                );
+            }
 
             String normalizedOriginal = originalContent
                     .replace("\r\n", "\n")
